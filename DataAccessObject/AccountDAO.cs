@@ -1,18 +1,16 @@
 ﻿using BusinessObject;
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace DataAccessObject
 {
-    public class AccountDAO : BaseDAL
+    public class AccountDAO
     {
         private static AccountDAO instance = null;
-        private static readonly object instanceLock = new object();
+        public static readonly object instanceLock = new object();
         private AccountDAO() { }
         public static AccountDAO Instance
         {
@@ -20,7 +18,7 @@ namespace DataAccessObject
             {
                 lock (instanceLock)
                 {
-                    if (instance == null)
+                    if(instance == null)
                     {
                         instance = new AccountDAO();
                     }
@@ -28,38 +26,20 @@ namespace DataAccessObject
                 }
             }
         }
-        //-----------------------------
-        public AccountMember GetAccountMember(string accountId)
+        //-------------------------------------
+        public AccountMember GetAccountByID(string id)
         {
-            SqlDataReader dataReader = null;
-            string SQL = "Select * from AccountMember where MemberID = @MemberID";
-            AccountMember account = null;
+            var accountMember = new AccountMember();
             try
             {
-                var param = StockDataProvider.CreateParameter("@MemberID", 20, accountId, DbType.String);
-                dataReader = StockDataProvider.GetDataReader(SQL, CommandType.Text, param);
-                if (dataReader.Read())
-                {
-                    account = new AccountMember()
-                    {
-                        MemberId = dataReader.GetString("MemberID"),
-                        MemberPassword = dataReader.GetString("MemberPassword"),
-                        FullName = dataReader.GetString("FullName"),
-                        EmailAddress = dataReader.GetString("EmailAddress"),
-                        MemberRole = dataReader.GetInt32("MemberRole")
-                    };
-                }
+                using var context = new MyStoreContext();
+                accountMember = context.AccountMembers.FirstOrDefault(c => c.MemberId.Equals(id));
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
-            finally
-            {
-                dataReader.Close();
-                CloseConnection();
-            }
-            return account;
+            return accountMember;
         }
     }
 }

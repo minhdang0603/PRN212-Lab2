@@ -1,18 +1,16 @@
 ﻿using BusinessObject;
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace DataAccessObject
 {
-    public class CategoryDAO : BaseDAL
+    public class CategoryDAO
     {
         private static CategoryDAO instance = null;
-        private static readonly object instanceLock = new object();
+        public static readonly object instanceLock = new object();
         private CategoryDAO() { }
         public static CategoryDAO Instance
         {
@@ -28,35 +26,20 @@ namespace DataAccessObject
                 }
             }
         }
-        //---------------
-        public IEnumerable<Category> GetCategories()
+        //-------------------------------------
+        public List<Category> GetCategories()
         {
-            SqlDataReader dataReader = null;
-            string SQL = "Select * from Categories";
-            var categories = new List<Category>();
+            var list = new List<Category>();
             try
             {
-                dataReader = StockDataProvider.GetDataReader(SQL, CommandType.Text);
-                while (dataReader.Read())
-                {
-                    categories.Add(new Category()
-                    {
-                        CategoryID = dataReader.GetInt32("CategoryID"),
-                        CategoryName = dataReader.GetString("CategoryName"),
-                    });
-                }
+                using var context = new MyStoreContext();
+                list = context.Categories.ToList();
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
-            finally
-            {
-                dataReader.Close();
-                CloseConnection();
-            }
-            return categories;
+            return list;
         }
-
     }
 }

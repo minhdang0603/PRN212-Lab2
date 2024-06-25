@@ -14,7 +14,7 @@ namespace Repositories
 
         public Product GetProductById(int id) => ProductDAO.Instance.GetProductById(id);
 
-        public List<Product> GetProducts() => ProductDAO.Instance.GetProducts().ToList();
+        public List<Product> GetProducts() => ProductDAO.Instance.GetProducts();
 
         public void SaveProduct(Product product) => ProductDAO.Instance.SaveProduct(product);
 
